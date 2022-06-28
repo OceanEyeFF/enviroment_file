@@ -1,0 +1,425 @@
+source $VIMRUNTIME/vimrc_example.vim
+source $VIMRUNTIME/mswin.vim
+
+set diffexpr=MyDiff()
+function MyDiff()
+  let opt = '-a --binary '
+  if &diffopt =~ 'icase' | let opt = opt . '-i ' | endif
+  if &diffopt =~ 'iwhite' | let opt = opt . '-b ' | endif
+  let arg1 = v:fname_in
+  if arg1 =~ ' ' | let arg1 = '"' . arg1 . '"' | endif
+  let arg1 = substitute(arg1, '!', '\!', 'g')
+  let arg2 = v:fname_new
+  if arg2 =~ ' ' | let arg2 = '"' . arg2 . '"' | endif
+  let arg2 = substitute(arg2, '!', '\!', 'g')
+  let arg3 = v:fname_out
+  if arg3 =~ ' ' | let arg3 = '"' . arg3 . '"' | endif
+  let arg3 = substitute(arg3, '!', '\!', 'g')
+  if $VIMRUNTIME =~ ' '
+    if &sh =~ '\<cmd'
+      if empty(&shellxquote)
+        let l:shxq_sav = ''
+        set shellxquote&
+      endif
+      let cmd = '"' . $VIMRUNTIME . '\diff"'
+    else
+      let cmd = substitute($VIMRUNTIME, ' ', '" ', '') . '\diff"'
+    endif
+  else
+    let cmd = $VIMRUNTIME . 'C:\Users\fdch0\~\diff'
+  endif
+  let cmd = substitute(cmd, '!', '\!', 'g')
+  silent execute '!' . cmd . ' ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3
+  if exists('l:shxq_sav')
+    let &shellxquote=l:shxq_sav
+  endif
+endfunction
+
+"vundle start
+set nocompatible " be iMproved, required
+filetype off                  " required
+
+call plug#begin('D:/.vim/plugged')
+Plug 'itchyny/lightline.vim'
+Plug 'scrooloose/nerdtree'
+Plug 'Lokaltog/vim-powerline'
+Plug 'rdnetto/YCM-Generator', { 'branch': 'stable'}
+Plug 'jiangmiao/auto-pairs'
+Plug 'ycm-core/YouCompleteMe', { 'do': './install.py --clang-completer --omnisharp-complete',  'for': ['c', 'cpp', 'python', 'cs'] }
+Plug 'majutsushi/tagbar'
+Plug 'Yggdroot/LeaderF', { 'do': '.\install.bat' }
+Plug 'tomasr/molokai'
+Plug 'sudar/vim-arduino-syntax'
+Plug 'lervag/vimtex'
+Plug 'skywind3000/asyncrun.vim'
+Plug 'dense-analysis/ale'
+Plug 'vim-scripts/a.vim'
+Plug 'Shougo/echodoc.vim'
+Plug 'ludovicchabant/vim-gutentags'
+Plug 'octol/vim-cpp-enhanced-highlight'
+Plug 'vim-pandoc/vim-pandoc'
+Plug 'vim-pandoc/vim-pandoc-syntax'
+" install vim-markdown when editing a md file
+Plug 'godlygeek/tabular', {'for': 'md'} 
+Plug 'plasticboy/vim-markdown', {'for': 'md'}
+Plug 'mzlogin/vim-markdown-toc'
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+call plug#end()
+
+
+" 将Vundle插件的目录添加到gvim的运行时变量中
+" All of your Plugs must be added before the following line
+filetype plugin indent on    " required
+
+"vundle end
+
+"LaTeX begin
+let g:tex_flavor='latex'
+"let g:Tex_CustomTemplateDirectory=‘你的模板目录’
+
+"LaTeX end
+
+set guifont=Consolas_for_Powerline_FixedD:h14:cANSI:qDRAFT
+colorscheme molokai
+let g:rehash256 =1
+inoremap qq <Esc> :w <CR>
+nnoremap qq :w <CR>
+inoremap #def #define
+
+set shiftwidth=4
+set softtabstop=4
+set tabstop=4
+set smarttab
+
+set number
+set cursorline
+syntax on
+set foldenable
+set foldmethod=syntax
+ 
+" 折叠方法  
+" manual    手工折叠  
+" indent    使用缩进表示折叠  
+" expr      使用表达式定义折叠  
+" syntax    使用语法定义折叠  
+" diff      对没有更改的文本进行折叠  
+" marker    使用标记进行折叠, 默ag.vim认标记是 {{{ 和 }}}  
+
+filetype on
+
+
+set encoding=utf-8
+
+set fileencodings=utf-8,gbk,gb18030,gb2312,cp936,ucs-bom,latin1
+
+set fileencoding=utf-8
+
+"解决菜单乱码
+source $VIMRUNTIME/delmenu.vim
+source $VIMRUNTIME/menu.vim
+
+"解决consle输出乱码
+language messages zh_CN.utf-8
+
+"gvim透明化
+
+" NERDTree config
+" open a NERDTree automatically when vim starts up
+autocmd vimenter * NERDTree
+"open a NERDTree automatically when vim starts up if no files were specified
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+"open NERDTree automatically when vim starts up on opening a directory
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
+"map F2 to open NERDTree
+map <F2> :NERDTreeToggle<CR>
+"close vim if the only window left open is a NERDTree
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+
+
+" powerline
+set encoding=utf-8
+set laststatus=2
+set t_Co=256   
+let g:Powerline_symbols= "fancy"
+
+
+:set list
+:set listchars=tab:--,trail:-
+hi SpecialKey ctermfg=77 guifg=#696969
+
+set colorcolumn=101
+set tw=100
+
+nnoremap <F5> :w <CR> :AsyncRun -mode=term -pos=external gdb \%CodePath\%/tmp/a.exe <CR>
+nnoremap <F8> <Esc>:w<CR> :AsyncRun -mode=term -pos=external g++ "$(VIM_FILEPATH)" -g -o \%CodePath\%/tmp/a.exe -std=c++14 <CR>
+nnoremap <F9> <Esc>:w<CR> :AsyncRun -mode=term -pos=external g++ "$(VIM_FILEPATH)" -g -o \%CodePath\%/tmp/a.exe -std=c++14 -DLOCAL<CR>
+map <C-F8> <F8> <F5>
+map <C-F9> <F9> <F5>
+
+
+"YCM begin
+"
+let g:ycm_global_ycm_extra_conf = 'D:/.vim/plugged/YouCompleteMe/third_party/ycmd/.ycm_extra_conf.py'
+let g:ycm_server_python_interpreter = 'C:/Python39/python.exe'
+"let g:ycm_python_binary_path = 'C:/Python39/python.exe'
+let g:ycm_add_preview_to_completeopt = 0
+let g:ycm_show_diagnostics_ui = 0
+let g:ycm_server_log_level = 'info'
+let g:ycm_min_num_identifier_candidate_chars = 2
+let g:ycm_collect_identifiers_from_comments_and_strings = 1
+let g:ycm_min_num_of_chars_for_completion=2
+let g:ycm_autoclose_preview_window_after_completion=1
+" 禁止缓存匹配项,每次都重新生成匹配项"
+let g:ycm_cache_omnifunc=0
+let g:ycm_complete_in_strings=1
+let g:ycm_key_invoke_completion = '<c-space>'
+set completeopt=menu,menuone
+
+noremap <c-z> <NOP>
+
+let g:ycm_semantic_triggers =  {
+			\ 'c,cpp,python,java,go,erlang,perl': ['re!\w{2}'],
+			\ 'cs,lua,javascript': ['re!\w{2}'],
+			\ }
+
+let g:ycm_filetype_whitelist = { 
+			\ "c":1,
+			\ "cs":1,
+			\ "cpp":1, 
+			\ "py":1, 
+			\ "md":1, 
+			\ "objc":1,
+			\ "sh":1,
+			\ "zsh":1,
+			\ "zimbu":1,
+			\ }
+"YCM end
+
+"LeaderF begin
+let g:Lf_ShortcutF = '<c-p>'
+let g:Lf_ShortcutB = '<m-n>'
+noremap <c-n> :LeaderfMru<cr>
+noremap <m-p> :LeaderfFunction!<cr>
+noremap <m-n> :LeaderfBuffer<cr>
+noremap <m-m> :LeaderfTag<cr>
+let g:Lf_StlSeparator = { 'left': '', 'right': '', 'font': '' }
+
+let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
+let g:Lf_WorkingDirectoryMode = 'Ac'
+let g:Lf_WindowHeight = 0.30
+let g:Lf_CacheDirectory = expand('~/.vim/cache')
+let g:Lf_ShowRelativePath = 0
+let g:Lf_HideHelp = 1
+let g:Lf_StlColorscheme = 'powerline'
+let g:Lf_PreviewResult = {'Function':0, 'BufTag':0}
+"LeaderF end
+
+"Echodoc begin
+let g:echodoc_enable_at_startup = 1
+set noshowmode
+"Echodoc end
+
+"Asyncrun begin
+" 自动打开 quickfix window ，高度为 6
+let g:asyncrun_open = 6
+
+" 任务结束时候响铃提醒
+let g:asyncrun_bell = 1
+
+" 设置 F10 打开/关闭 Quickfix 窗口
+nnoremap <F10> :call asyncrun#quickfix_toggle(6)<cr>
+"Asyncrun end
+
+let $GTAGSLABEL = 'native-pygments'
+let $GTAGSCONF = 'C:/tools/glo665wb/share/gtags/gtags.conf'
+
+" gutentags 搜索工程目录的标志，当前文件路径向上递归直到碰到这些文件/目录名
+let g:gutentags_project_root = ['.root', '.svn', '.git', '.hg', '.project']
+
+" 所生成的数据文件的名称
+let g:gutentags_ctags_tagfile = '.tags'
+
+" 同时开启 ctags 和 gtags 支持：
+let g:gutentags_modules = []
+if executable('ctags')
+	let g:gutentags_modules += ['ctags']
+endif
+if executable('gtags-cscope') && executable('gtags')
+	let g:gutentags_modules += ['gtags_cscope']
+endif
+
+" 将自动生成的 ctags/gtags 文件全部放入 ~/.cache/tags 目录中，避免污染工程目录
+let g:gutentags_cache_dir = expand('~/.cache/tags')
+
+" 配置 ctags 的参数，老的 Exuberant-ctags 不能有 --extra=+q，注意
+let g:gutentags_ctags_extra_args = [ "--fields=+niazS", "--extra=+q"]
+let g:gutentags_ctags_extra_args += ["--c++-kinds=+px" ]
+let g:gutentags_ctags_extra_args += ["--c-kinds=+px"]
+
+" 如果使用 universal ctags 需要增加下面一行，老的 Exuberant-ctags 不能加下一行
+let g:gutentags_ctags_extra_args += ["--output-format=e-ctags"]
+
+" 禁用 gutentags 自动加载 gtags 数据库的行为
+let g:gutentags_auto_add_gtags_cscope = 0
+
+"debug
+"let g:gutentags_trace = 1
+
+
+"tagbar begin
+" 设置 tagbar 子窗口的位置出现在主编辑区的左边 
+let tagbar_left=1 
+" 设置显示／隐藏标签列表子窗口的快捷键。速记：identifier list by tag
+nmap <C-t> :TagbarToggle<CR> 
+" 设置标签子窗口的宽度 
+let tagbar_width=32 
+" tagbar 子窗口中不显示冗余帮助信息 
+let g:tagbar_compact=1
+" 设置 ctags 对哪些代码标识符生成标签
+let g:tagbar_type_cpp = {
+    \ 'kinds' : [
+         \ 'c:classes:0:1',
+         \ 'd:macros:0:1',
+         \ 'e:enumerators:0:0', 
+         \ 'f:functions:0:1',
+         \ 'g:enumeration:0:1',
+         \ 'l:local:0:1',
+         \ 'm:members:0:1',
+         \ 'n:namespaces:0:1',
+         \ 'p:functions_prototypes:0:1',
+         \ 's:structs:0:1',
+         \ 't:typedefs:0:1',
+         \ 'u:unions:0:1',
+         \ 'v:global:0:1',
+         \ 'x:external:0:1'
+     \ ],
+     \ 'sro'        : '::',
+     \ 'kind2scope' : {
+         \ 'g' : 'enum',
+         \ 'n' : 'namespace',
+         \ 'c' : 'class',
+         \ 's' : 'struct',
+         \ 'u' : 'union'
+     \ },
+     \ 'scope2kind' : {
+         \ 'enum'      : 'g',
+         \ 'namespace' : 'n',
+         \ 'class'     : 'c',
+         \ 'struct'    : 's',
+         \ 'union'     : 'u'
+     \ }
+\ }
+
+"tagbar end
+"
+"ale begin
+"
+let g:ale_linters_explicit = 1
+let g:ale_completion_delay = 500
+let g:ale_echo_delay = 20
+let g:ale_lint_delay = 500
+let g:ale_echo_msg_format = '[%linter%] %code: %%s'
+let g:ale_lint_on_text_changed = 'normal'
+let g:ale_lint_on_insert_leave = 1
+let g:airline#extensions#ale#enabled = 1
+
+let g:ale_c_gcc_options = '-Wall -O2 -std=c99'
+let g:ale_cpp_gcc_options = '-Wall -O2 -std=c++14'
+let g:ale_c_cppcheck_options = ''
+let g:ale_cpp_cppcheck_options = ''
+
+let g:ale_sign_error = "\ue009\ue009"
+hi! clear SpellBad
+hi! clear SpellCap
+hi! clear SpellRare
+hi! SpellBad gui=undercurl guisp=red
+hi! SpellCap gui=undercurl guisp=blue
+hi! SpellRare gui=undercurl guisp=magenta
+
+"ale end
+
+
+"vim-Tex
+let g:tex_flavor = 'latex'
+let g:tex_indent_items = 0
+let g:Tex_DefaultTargetFormat = 'pdf'
+let g:Tex_CompileRule_pdf = 'xelatex -src-specials -synctex=1 -interaction=nonstopmode $*'   
+let g:Tex_FormatDependency_pdf = 'pdf'
+  if !exists('g:ycm_semantic_triggers')
+    let g:ycm_semantic_triggers = {}
+  endif
+  au VimEnter * let g:ycm_semantic_triggers.tex=g:vimtex#re#youcompleteme
+let g:vimtex_view_method = 'general'
+let g:vimtex_enabled = 1
+let g:vimtex_complete_img_use_tail = 1
+let g:vimtex_view_general_viewer = 'SumatraPDF'
+let g:vimtex_view_general_options_latexmk = '-reuse-instance'
+let g:vimtex_view_general_options
+	\ = '-reuse-instance -forward-search @tex @line @pdf'
+	\ . ' -inverse-search "' . exepath(v:progpath)
+	\ . ' --servername ' . v:servername
+	\ . ' --remote-send \"^<C-\^>^<C-n^>'
+	\ . ':execute ''drop '' . fnameescape(''\%f'')^<CR^>'
+	\ . ':\%l^<CR^>:normal\! zzzv^<CR^>'
+	\ . ':call remote_foreground('''.v:servername.''')^<CR^>^<CR^>\""'
+
+
+"Markdown file
+let g:vim_markdown_math = 1
+autocmd BufNewFile,BufRead *.markdown,*.mdown,*.mkd,*.mkdn,*.mdwn,*.mdset filetype=markdown
+
+	let g:pandoc#toc#position = "left"
+	let g:pandoc#formatting#mode = 'h'
+	let g:pandoc#formatting#smart_autoformat_on_cursormoved = 1
+	let g:pandoc#folding#level = 9
+	let g:pandoc#folding#fdc = 0
+	let g:pandoc#folding#mode = "relative"
+	let g:pandoc#filetypes#handled = ["markdown","pandoc"]
+	let g:pandoc#filetypes#pandoc_markdown = 0
+	let g:pandoc#modules#disabled = ['spell']
+	let g:pandoc#completion#bib#mode = 'citeproc'
+	let g:pandoc#syntax#colorcolumn = 1
+
+function! ToPdf()
+    exec 'w'
+    exec '!pandoc --pdf-engine=xelatex --template=pm-template.tex % --output %<.pdf -V CJKmainfont="SongTi"'
+endfunction
+
+function! ToDocx()
+		exec 'w'
+    	exec '!pandoc --from=markdown --to=docx  % --output %<.docx -V CJKmainfont="SongTi"'
+endfunction
+
+"vim-markdown-toc"
+let g:vmt_auto_update_on_save = 0 
+function RToc()
+    exe "/-toc .* -->"
+    let lstart=line('.')
+    exe "/-toc -->"
+    let lnum=line('.')
+    execute lstart.",".lnum."g/           /d"
+endfunction
+
+"Markdown-preview"
+let g:mkdp_browser = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
+let g:mkdp_markdown_css=''
+
+au GUIEnter * call libcallnr("vimtweak64.dll", "SetAlpha", 226)
+nnoremap <F12> :call libcallnr("vimtweak64.dll", "SetAlpha", 226) <CR>
+nnoremap <F11> :call libcallnr("vimtweak64.dll", "SetAlpha", 32) <CR>
+
+" Python Begin
+map <F4> :Autopep8<CR> :w<CR> :call RunPython()<CR>
+function RunPython()
+    let mp = &makeprg
+    let ef = &errorformat
+    let exeFile = expand("%:t")
+    setlocal makeprg=python\ -u
+    set efm=%C\ %.%#,%A\ \ File\ \"%f\"\\,\ line\ %l%.%#,%Z%[%^\ ]%\\@=%m
+    silent make %
+    copen
+    let &makeprg = mp
+    let &errorformat = ef
+endfunction
